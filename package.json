@@ -1,0 +1,38 @@
+{
+  "name": "@mizcausevic-dev/mcp-ai-tutor",
+  "version": "0.1.0",
+  "description": "MCP server that exposes AI Tutor Card declarations as tools. Drop into Claude Desktop / Cursor; agents and procurement reviewers can inspect audience, pedagogy, safety, and FERPA/COPPA posture programmatically.",
+  "type": "module",
+  "bin": {
+    "mcp-ai-tutor": "./dist/server.js"
+  },
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/server.js"
+  },
+  "keywords": ["mcp", "model-context-protocol", "ai-tutor", "edtech", "education", "ferpa", "coppa", "claude", "kinetic-gain-protocol-suite"],
+  "author": "Miz Causevic",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mizcausevic-dev/mcp-ai-tutor.git"
+  },
+  "homepage": "https://github.com/mizcausevic-dev/mcp-ai-tutor",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  }
+}
