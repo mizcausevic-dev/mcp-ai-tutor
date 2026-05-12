@@ -7,9 +7,9 @@ This log is intentionally written as an engineering record rather than a launch 
 ## [1.0.0] - 2026-05-12
 
 ### Released
-- Published \$name\ as a public, portfolio-grade MCP governance system.
+- Published **mcp-ai-tutor** as a public, portfolio-grade MCP governance system.
 - Packaged the current implementation, documentation, validation workflow, and proof surfaces into a repo that could be reviewed by engineering, product, and operating stakeholders.
-- Tightened the repo story around the real-world operating problem: the MCP governance gap as agent-connected tool surfaces moved into production.
+- Tightened the repo story around the real-world operating problem: the MCP governance gap around agent-connected tool surfaces in production.
 
 ### Why this mattered
 - Existing approaches in traditional API security tools, AppSec scanners, and cloud posture platforms were useful, but they could see endpoints and infrastructure posture, but not the operational blast radius of tool exposure, schema drift, or prompt-driven misuse.
@@ -18,7 +18,7 @@ This log is intentionally written as an engineering record rather than a launch 
 ## [0.1.0] - 2026-02-20
 
 ### Shipped
-- Cut the first coherent internal version of the product shape behind \$name\.
+- Cut the first coherent internal version of the product shape behind **mcp-ai-tutor**.
 - Standardized the core objects, decision surfaces, and operator outputs around the repo's main working problem.
 - Established the first reviewable version of the architecture described as: MCP server for AI Tutor Card disclosures. Six tools for procurement review, curriculum matching, and FERPA / COPPA compliance auditing of AI tutors. EdTech-flavored extension of the Kinetic Gain Protocol Suite.
 
@@ -55,12 +55,12 @@ This log is intentionally written as an engineering record rather than a launch 
 ## [Idea Origin] - 2024-02-17
 
 ### Observed
-- The initial idea surfaced while looking at how teams were handling the MCP governance gap as agent-connected tool surfaces moved into production.
+- The initial idea surfaced while looking at how teams were handling the MCP governance gap around agent-connected tool surfaces in production.
 - The recurring pattern was that people could often see fragments of the problem, but not the whole operational story in one place.
 
 ### Insight
 - The missing product was not another point solution. It was a clearer operating layer that made the work legible to platform engineering and security teams.
-- That insight became the basis for \$name\.
+- That insight became the basis for **mcp-ai-tutor**.
 
 ## [Background Signals] - 2022-08-09
 
