@@ -8,14 +8,28 @@
   },
   "main": "./dist/server.js",
   "types": "./dist/server.d.ts",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "start": "node dist/server.js"
   },
-  "keywords": ["mcp", "model-context-protocol", "ai-tutor", "edtech", "education", "ferpa", "coppa", "claude", "kinetic-gain-protocol-suite"],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-tutor",
+    "edtech",
+    "education",
+    "ferpa",
+    "coppa",
+    "claude",
+    "kinetic-gain-protocol-suite"
+  ],
   "author": "Miz Causevic",
   "license": "AGPL-3.0",
   "repository": {
@@ -33,6 +47,6 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.0.0"
+    "vitest": "^3.2.7"
   }
 }
