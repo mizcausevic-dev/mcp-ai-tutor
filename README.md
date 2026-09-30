@@ -53,7 +53,7 @@ The `env` entry is needed only for URL-based tools. A compatible MCP client shou
 
 ## Workflows this unlocks
 
-**District procurement review.** Pull two tutors' cards in one conversation and let Claude compare them:
+**Compare publisher disclosures.** Pull two tutors' cards into a compatible MCP client and compare their stated fields; verify material claims independently:
 
 > *"Fetch both `https://vendor-a.example/.well-known/tutors/math-tutor.json` and `https://vendor-b.example/.well-known/tutors/math-tutor.json`, run `tutor_card_inspect` on each, and tell me which has stricter content filters and which keeps less student data."*
 
