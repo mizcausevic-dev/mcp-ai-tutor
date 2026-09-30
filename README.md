@@ -112,7 +112,7 @@ This is a fictional response shape, not an evaluation of a deployed tutor.
 
 ## Tests
 
-23 unit tests covering every tool, classification and COPPA branches, schema consistency, and remote-fetch guardrails without external network.
+23 unit tests cover every tool, classification and COPPA branches, schema consistency, and remote-fetch guardrails without external network. After `npm run build`, `npm run smoke:stdio` launches the CLI, completes an MCP handshake, lists six tools, calls one, and checks unknown-tool rejection.
 
 ```bash
 npm ci

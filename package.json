@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "smoke:stdio": "node tests/stdio-smoke.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "start": "node dist/server.js"

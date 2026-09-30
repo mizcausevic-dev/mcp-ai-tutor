@@ -14,6 +14,7 @@
  */
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { pathToFileURL } from "node:url";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -203,7 +204,7 @@ async function main(): Promise<void> {
   );
 }
 
-if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, "/")}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((err) => {
     process.stderr.write(`mcp-ai-tutor: fatal: ${err}\n`);
     process.exit(1);
