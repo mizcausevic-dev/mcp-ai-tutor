@@ -1,7 +1,7 @@
 {
   "name": "@mizcausevic-dev/mcp-ai-tutor",
   "version": "0.1.0",
-  "description": "MCP server that exposes AI Tutor Card declarations as tools. Drop into Claude Desktop / Cursor; agents and procurement reviewers can inspect audience, pedagogy, safety, and FERPA/COPPA posture programmatically.",
+  "description": "Stdio MCP tools for inspecting publisher-declared AI Tutor Cards; safety and compliance fields are unverified disclosures.",
   "type": "module",
   "bin": {
     "mcp-ai-tutor": "./dist/server.js"
@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "smoke:stdio": "node tests/stdio-smoke.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "start": "node dist/server.js"
@@ -38,7 +39,7 @@
   },
   "homepage": "https://github.com/mizcausevic-dev/mcp-ai-tutor",
   "engines": {
-    "node": ">=18"
+    "node": "^22.20.0 || ^24.12.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",

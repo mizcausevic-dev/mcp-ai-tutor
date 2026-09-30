@@ -4,16 +4,17 @@
  *
  * Tools:
  *   - tutor_card_well_known_url  : compute discovery URL
- *   - tutor_card_fetch           : fetch a card from any URL
+ *   - tutor_card_fetch           : fetch a card from an allowed canonical HTTPS URL
  *   - tutor_card_validate        : schema-validate an inline JSON document
  *   - tutor_card_inspect         : structured procurement summary
  *   - tutor_card_subject_check   : does the tutor cover topic X?
- *   - tutor_card_coppa_check     : COPPA conditional-rule verification
+ *   - tutor_card_coppa_check     : COPPA declaration consistency check
  *
- * Drop into Claude Desktop, Cursor, or any MCP-compatible client via stdio.
+ * Run as a stdio MCP server; client-specific interoperability is not tested here.
  */
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { pathToFileURL } from "node:url";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -24,7 +25,9 @@ import {
   checkCoppa,
   checkSubject,
   fetchTutorCard,
+  fetchTutorCardText,
   parseTutorCard,
+  parseTutorCardDisclosure,
   tutorCardSchema,
   tutorWellKnownUrl,
 } from "./document.js";
@@ -37,6 +40,12 @@ function pretty(value: unknown): string {
 async function loadCard(args: { url?: string; document_json?: string }): Promise<TutorCard> {
   if (args.document_json) return parseTutorCard(args.document_json);
   if (args.url) return await fetchTutorCard(args.url);
+  throw new Error("must provide either `url` or `document_json`");
+}
+
+async function loadCardDisclosure(args: { url?: string; document_json?: string }): Promise<TutorCard> {
+  if (args.document_json) return parseTutorCardDisclosure(args.document_json);
+  if (args.url) return parseTutorCardDisclosure(await fetchTutorCardText(args.url));
   throw new Error("must provide either `url` or `document_json`");
 }
 
@@ -57,6 +66,7 @@ export async function handleTutorCardValidate(args: { document_json: string }): 
     const card = parseTutorCard(args.document_json);
     return pretty({
       valid: true,
+      disclosure_only: true,
       tutor_id: card.tutor.id,
       version: card.tutor.version,
       coppa_check: checkCoppa(card),
@@ -75,6 +85,7 @@ export async function handleTutorCardInspect(args: {
 }): Promise<string> {
   const card = await loadCard(args);
   return pretty({
+    disclosure_only: true,
     tutor_card_version: card.tutor_card_version,
     tutor: {
       id: card.tutor.id,
@@ -134,7 +145,7 @@ export async function handleTutorCardCoppaCheck(args: {
   url?: string;
   document_json?: string;
 }): Promise<string> {
-  const card = await loadCard(args);
+  const card = await loadCardDisclosure(args);
   return pretty({
     tutor_id: card.tutor.id,
     ...checkCoppa(card),
@@ -193,7 +204,7 @@ async function main(): Promise<void> {
   );
 }
 
-if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, "/")}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((err) => {
     process.stderr.write(`mcp-ai-tutor: fatal: ${err}\n`);
     process.exit(1);
