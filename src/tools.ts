@@ -19,7 +19,7 @@ export const toolDescriptors = [
   {
     name: "tutor_card_fetch",
     description:
-      "Fetch and return the full AI Tutor Card from a URL. Provide either the well-known URL or any other URL where the card is hosted.",
+      "Fetch and return a full AI Tutor Card from its canonical /.well-known/tutors/<id>.json URL on an operator-allowed HTTPS host.",
     inputSchema: {
       type: "object",
       required: ["url"],
@@ -44,7 +44,7 @@ export const toolDescriptors = [
   {
     name: "tutor_card_inspect",
     description:
-      "Return a structured procurement-review summary of an AI Tutor Card: audience, pedagogy (homework/assessment policy), safety strength, FERPA / COPPA / GDPR posture, retention, data-sharing rules, evaluation suites. Accepts EITHER `url` (fetched) OR `document_json` (inline).",
+      "Return a structured summary of publisher-declared Tutor Card fields: audience, pedagogy, safety, privacy assertions, retention, data-sharing rules, and evaluation count. Accepts EITHER `url` (fetched) OR `document_json` (inline).",
     inputSchema: {
       type: "object",
       additionalProperties: false,
@@ -72,7 +72,7 @@ export const toolDescriptors = [
   {
     name: "tutor_card_coppa_check",
     description:
-      "Verify the spec's conditional COPPA rule: if audience.age_range_min < 13, data_privacy.coppa_compliant MUST be true. Returns { ok, reason, age_range_min, coppa_compliant }. Procurement-blocking signal when ok=false.",
+      "Check the spec's conditional COPPA declaration rule: if audience.age_range_min < 13, data_privacy.coppa_compliant MUST be true. Returns { ok, reason, age_range_min, coppa_compliant }. This does not verify legal compliance.",
     inputSchema: {
       type: "object",
       additionalProperties: false,

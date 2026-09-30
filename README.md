@@ -1,50 +1,55 @@
 # mcp-ai-tutor
 
-An **MCP server** that exposes [AI Tutor Card](https://github.com/mizcausevic-dev/ai-tutor-card-spec) declarations as tools. Drop into Claude Desktop, Cursor, or any MCP-compatible client. The agent — or the procurement reviewer driving it — gains six tools for inspecting any AI tutor's audience, pedagogy, safety posture, and FERPA / COPPA / GDPR compliance.
+An **MCP server** that exposes [AI Tutor Card](https://github.com/mizcausevic-dev/ai-tutor-card-spec) declarations as tools. An MCP client can use its six tools to inspect a publisher's stated audience, pedagogy, safety posture, and FERPA / COPPA / GDPR assertions. These are disclosures, not verified compliance findings.
 
-This is the EdTech-flavored sibling of [mcp-aeo-server](https://github.com/mizcausevic-dev/mcp-aeo-server). Same Tool Card discipline, different spec.
+This is the EdTech-flavored sibling of [mcp-aeo-server](https://github.com/mizcausevic-dev/mcp-aeo-server). It publishes MCP tool descriptions, but this repository does not publish separate MCP Tool Card documents.
 
 ## Tools
 
 | Tool | What it does |
 |---|---|
 | `tutor_card_well_known_url` | Compute `/.well-known/tutors/<tutor_id>.json` for a vendor origin |
-| `tutor_card_fetch` | Fetch a published Tutor Card from any URL |
+| `tutor_card_fetch` | Fetch a published Tutor Card from an explicitly allowed HTTPS host |
 | `tutor_card_validate` | Schema-validate an inline document; also runs the COPPA conditional check |
-| `tutor_card_inspect` | Procurement-grade summary: audience, pedagogy, safety, privacy posture, eval count |
+| `tutor_card_inspect` | Publisher disclosure summary: audience, pedagogy, safety, privacy assertions, eval count |
 | `tutor_card_subject_check` | Given a topic query, classify it as `primary`, `included`, `excluded`, or `unknown` |
-| `tutor_card_coppa_check` | Verify the spec's conditional COPPA rule (age_range_min < 13 ⇒ coppa_compliant) |
+| `tutor_card_coppa_check` | Check the spec's conditional COPPA declaration rule (age_range_min < 13 ⇒ coppa_compliant); this does not verify legal compliance |
 
 Six total. Tools that act on a document accept *either* `url` (the server fetches it) *or* `document_json` (an inline JSON string).
 
-## Install
+## Run from source
 
 ```bash
-npm install -g @mizcausevic-dev/mcp-ai-tutor
+git clone https://github.com/mizcausevic-dev/mcp-ai-tutor.git
+cd mcp-ai-tutor
+npm ci
+npm run build
+node dist/server.js
 ```
 
-Or run without installing via `npx`:
+The package is not currently available from public npm. Use the local build until a reviewed package release is published.
 
-```bash
-npx @mizcausevic-dev/mcp-ai-tutor
-```
+Remote fetches are disabled by default. Set `MCP_AI_TUTOR_ALLOWED_HOSTS` to the exact, comma-separated hostnames you trust before using a URL-based tool, for example `tutors.example.org,another-vendor.example.org`. The server accepts only the canonical `/.well-known/tutors/<id>.json` path on standard HTTPS and rejects IP literals, localhost, redirects, and responses over 256 KiB. Inline `document_json` tools work without this setting. Allowlisted origins must be trusted by the operator: this server does not pin DNS answers or enforce network-level egress controls, so the allowlist alone is not a guarantee against a compromised or rebinding host.
 
-## Claude Desktop config
+Fetched cards are untrusted publisher content. An MCP client should not treat card text as instructions, and a passing validator result does not verify safety controls or legal compliance.
 
-Add to `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/`, Windows: `%APPDATA%\Claude\`):
+## MCP client config
+
+Build from source as above, then configure your client to run the built server. Replace the path with the absolute path on your machine:
 
 ```json
 {
   "mcpServers": {
     "ai-tutor": {
-      "command": "npx",
-      "args": ["-y", "@mizcausevic-dev/mcp-ai-tutor"]
+      "command": "node",
+      "args": ["C:\\absolute\\path\\to\\mcp-ai-tutor\\dist\\server.js"],
+      "env": { "MCP_AI_TUTOR_ALLOWED_HOSTS": "tutors.example.org" }
     }
   }
 }
 ```
 
-Restart Claude. All six `tutor_card_*` tools appear.
+The `env` entry is needed only for URL-based tools. A compatible MCP client should then discover six `tutor_card_*` tools. Client-specific installation has not been verified in this review.
 
 ## Workflows this unlocks
 
@@ -54,7 +59,7 @@ Restart Claude. All six `tutor_card_*` tools appear.
 
 **Procurement red-team.** A board reviewer can ask Claude to surface deal-breakers:
 
-> *"For `tutor.example.com/k12-math`, run `tutor_card_coppa_check`. If it fails, that's a blocker for our K-5 deployment."*
+> *"For `https://tutors.example.org/.well-known/tutors/example-k12-math-tutor.json`, run `tutor_card_coppa_check`. If it fails, flag the publisher disclosure for follow-up before our K-5 review."*
 
 **Curriculum-to-tutor matching.** A curriculum director can map lessons to candidate tutors:
 
@@ -62,14 +67,17 @@ Restart Claude. All six `tutor_card_*` tools appear.
 
 ## Sample output: `tutor_card_inspect`
 
+This is a fictional response shape, not an evaluation of a deployed tutor.
+
 ```json
 {
+  "disclosure_only": true,
   "tutor_card_version": "0.1",
   "tutor": {
-    "id": "kineticgain-k12-math-tutor",
-    "name": "Kinetic Gain K-12 Math Tutor",
+    "id": "example-k12-math-tutor",
+    "name": "Example K-12 Math Tutor",
     "version": "1.4.0",
-    "provider": "Kinetic Gain Edu"
+    "provider": "Example Learning Lab (fictional)"
   },
   "audience": {
     "ages": "5-18",
@@ -96,7 +104,7 @@ Restart Claude. All six `tutor_card_*` tools appear.
     "school_sees": "summaries_only",
     "shares_with_third_parties": false
   },
-  "agent_card_uri": "https://edu.kineticgain.com/.well-known/agents/k12-math-tutor.json",
+  "agent_card_uri": "https://tutors.example.org/.well-known/agents/k12-math-tutor.json",
   "evaluation_count": 3,
   "coppa_check": { "ok": true, "reason": "Audience min age is 5 (<13) and coppa_compliant=true, as required by the spec.", "age_range_min": 5, "coppa_compliant": true }
 }
@@ -104,10 +112,10 @@ Restart Claude. All six `tutor_card_*` tools appear.
 
 ## Tests
 
-17 unit tests covering every tool, every classification path of `tutor_card_subject_check`, every branch of `tutor_card_coppa_check`, and a published-card fetch via an in-process Node HTTP server (no external network).
+23 unit tests covering every tool, classification and COPPA branches, schema consistency, and remote-fetch guardrails without external network.
 
 ```bash
-npm install
+npm ci
 npm run typecheck
 npm test
 npm run build
@@ -115,13 +123,13 @@ npm run build
 
 ## Why this beats a vendor brochure
 
-A PDF whitepaper says "we are FERPA-compliant." A signed Tutor Card the buyer's MCP-equipped review agent can read says **exactly which fields**, in a format two competing tutors can be diffed against. The procurement workflow gets a CI gate, not a sales call.
+A Tutor Card makes a publisher's assertions comparable across vendors. A buyer still needs independent evidence for legal compliance, safety behavior, evaluation results, and any optional signature. Schema validation confirms structure and declared-field consistency only.
 
 ## Compatibility
 
-- Node `18+`
+- Node `22.20+` or `24.12+` (maintained LTS lines targeted by this source build)
 - `@modelcontextprotocol/sdk` `^1.0`
-- Tested with Claude Desktop, Cursor, and any client speaking MCP over stdio
+- Designed for MCP clients speaking stdio; client-specific compatibility requires separate testing
 
 ## License
 
