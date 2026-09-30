@@ -5,9 +5,9 @@
  */
 import { z } from "zod";
 import { isIP } from "node:net";
+import { fetchPinnedHttpsText, type AddressLookup, type HttpsRequest } from "./network.js";
 
 export const WELL_KNOWN_PREFIX = "/.well-known/tutors/";
-const ACCEPT_HEADER = "application/json";
 const MAX_CARD_BYTES = 256 * 1024;
 const TUTOR_ID = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 const CARD_PATH = /^\/\.well-known\/tutors\/[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.json$/;
@@ -146,47 +146,14 @@ function checkedCardUrl(raw: string): URL {
   return url;
 }
 
-export async function fetchTutorCardText(rawUrl: string, { timeoutMs = 10_000 }: { timeoutMs?: number } = {}): Promise<string> {
+export async function fetchTutorCardText(
+  rawUrl: string,
+  { timeoutMs = 10_000, lookup, request }: { timeoutMs?: number; lookup?: AddressLookup; request?: HttpsRequest } = {},
+): Promise<string> {
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0 || timeoutMs > 30_000) {
     throw new Error("timeoutMs must be between 1 and 30000 milliseconds");
   }
-  const url = checkedCardUrl(rawUrl);
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, {
-      headers: { Accept: ACCEPT_HEADER },
-      signal: controller.signal,
-      redirect: "error",
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status} ${response.statusText} (${url})`);
-    }
-    const contentType = response.headers.get("content-type") ?? "";
-    if (!/^application\/(?:[\w.-]+\+)?json(?:\s*;|\s*$)/i.test(contentType)) {
-      throw new Error("Tutor Card response must have a JSON Content-Type");
-    }
-    if (!response.body) throw new Error("Tutor Card response has no body");
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let result = "";
-    let bytes = 0;
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        bytes += value.byteLength;
-        if (bytes > MAX_CARD_BYTES) throw new Error("Tutor Card response exceeds 256 KiB");
-        result += decoder.decode(value, { stream: true });
-      }
-      result += decoder.decode();
-      return result;
-    } finally {
-      await reader.cancel().catch(() => undefined);
-    }
-  } finally {
-    clearTimeout(timer);
-  }
+  return fetchPinnedHttpsText(checkedCardUrl(rawUrl), { timeoutMs, lookup, request });
 }
 
 export async function fetchTutorCard(url: string): Promise<TutorCard> {

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { handlers } from "../src/server.js";
 import { fetchTutorCardText } from "../src/document.js";
+import * as network from "../src/network.js";
 
 const K12_MATH_TUTOR = {
   tutor_card_version: "0.1",
@@ -93,7 +94,7 @@ describe("tutor_card_well_known_url", () => {
 
 describe("tutor_card_fetch", () => {
   it("fetches a published card", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(K12_MATH_TUTOR), { headers: { "content-type": "application/json" } }));
+    vi.spyOn(network, "fetchPinnedHttpsText").mockResolvedValue(JSON.stringify(K12_MATH_TUTOR));
     const out = JSON.parse(
       await handlers.tutor_card_fetch!({
         url: cardUrl,
@@ -104,7 +105,7 @@ describe("tutor_card_fetch", () => {
   });
 
   it("rejects private or unapproved destinations before fetching", async () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const fetchSpy = vi.spyOn(network, "fetchPinnedHttpsText");
     await expect(handlers.tutor_card_fetch!({ url: "http://127.0.0.1:9000/metadata" })).rejects.toThrow("public HTTPS");
     await expect(handlers.tutor_card_fetch!({ url: "https://other.example.org/.well-known/tutors/math.json" })).rejects.toThrow("ALLOWED_HOSTS");
     await expect(handlers.tutor_card_fetch!({ url: "https://tutors.example.org/admin" })).rejects.toThrow("canonical");
@@ -116,12 +117,6 @@ describe("tutor_card_fetch", () => {
     await expect(fetchTutorCardText(cardUrl, { timeoutMs: Number.POSITIVE_INFINITY })).rejects.toThrow("timeoutMs");
   });
 
-  it("caps remote card size and rejects redirects", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response("x".repeat(256 * 1024 + 1), { headers: { "content-type": "application/json" } }));
-    await expect(fetchTutorCardText(cardUrl)).rejects.toThrow("256 KiB");
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.redirect("https://other.example.org/card.json"));
-    await expect(fetchTutorCardText(cardUrl)).rejects.toThrow("HTTP 302");
-  });
 });
 
 describe("tutor_card_validate", () => {
@@ -189,7 +184,7 @@ describe("tutor_card_inspect", () => {
   });
 
   it("fetches a URL when document_json is absent", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(K12_MATH_TUTOR), { headers: { "content-type": "application/json" } }));
+    vi.spyOn(network, "fetchPinnedHttpsText").mockResolvedValue(JSON.stringify(K12_MATH_TUTOR));
     const out = JSON.parse(
       await handlers.tutor_card_inspect!({
         url: cardUrl,

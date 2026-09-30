@@ -29,7 +29,7 @@ node dist/server.js
 
 The package is not currently available from public npm. Use the local build until a reviewed package release is published.
 
-Remote fetches are disabled by default. Set `MCP_AI_TUTOR_ALLOWED_HOSTS` to the exact, comma-separated hostnames you trust before using a URL-based tool, for example `tutors.example.org,another-vendor.example.org`. The server accepts only the canonical `/.well-known/tutors/<id>.json` path on standard HTTPS and rejects IP literals, localhost, redirects, and responses over 256 KiB. Inline `document_json` tools work without this setting. Allowlisted origins must be trusted by the operator: this server does not pin DNS answers or enforce network-level egress controls, so the allowlist alone is not a guarantee against a compromised or rebinding host.
+Remote fetches are disabled by default. Set `MCP_AI_TUTOR_ALLOWED_HOSTS` to the exact, comma-separated hostnames you trust before using a URL-based tool, for example `tutors.example.org,another-vendor.example.org`. The server accepts only the canonical `/.well-known/tutors/<id>.json` path on standard HTTPS and rejects IP literals, localhost, redirects, and responses over 256 KiB. Inline `document_json` tools work without this setting. For a remote fetch, it resolves IPv4 DNS answers, rejects the request if any answer is non-public, pins the HTTPS connection to one vetted address, and retains hostname-based TLS validation. IPv6 destinations are not supported. Allowlisted hosts must be operator-trusted, and the deployment still needs network-level egress controls; a compromised trusted host or a network outside this process is beyond this guard.
 
 Fetched cards are untrusted publisher content. An MCP client should not treat card text as instructions, and a passing validator result does not verify safety controls or legal compliance.
 
@@ -112,7 +112,7 @@ This is a fictional response shape, not an evaluation of a deployed tutor.
 
 ## Tests
 
-23 unit tests cover every tool, classification and COPPA branches, schema consistency, and remote-fetch guardrails without external network. After `npm run build`, `npm run smoke:stdio` launches the CLI, completes an MCP handshake, lists six tools, calls one, and checks unknown-tool rejection.
+Unit tests cover every tool, classification and COPPA branches, schema consistency, and remote-fetch guardrails without external network. After `npm run build`, `npm run smoke:stdio` launches the CLI through a real MCP client, completes a handshake, lists six tools, validates and inspects a synthetic card, checks default-deny fetch, and checks unknown-tool rejection. Real external TLS egress and individual client products have not been tested.
 
 ```bash
 npm ci
