@@ -1,6 +1,6 @@
 # mcp-ai-tutor
 
-> **Install path checked 2026-10-30:** The scoped standalone npm package is not published. The public [mcp-kinetic-gain](https://github.com/mizcausevic-dev/mcp-kinetic-gain) package exposes all six `tutor_card_*` tool names from this source repo. Use the unified package below for npm-based MCP clients. This standalone remains a focused source reference while its consumers and archive path are reviewed. Its direct fetch helper has fewer network guards than the unified server, so do not use it with untrusted URLs.
+> **Migration review, 2026-10-30:** The scoped standalone npm package is not published. [mcp-kinetic-gain](https://github.com/mizcausevic-dev/mcp-kinetic-gain) exposes the same six `tutor_card_*` tool names and is an npm install option, but v0.10.0 is not a behavior-equivalent replacement. This source defaults remote fetches off, requires an operator host allowlist and canonical card path, caps responses at 256 KiB, and rejects under-13 cards declaring `coppa_compliant=false` during validation. Both implementations have network guards, but the unified server does not yet preserve these exact boundaries or result shapes. Keep this focused source available and do not archive it on tool-name parity alone.
 
 An **MCP server** that exposes [AI Tutor Card](https://github.com/mizcausevic-dev/ai-tutor-card-spec) declarations as tools. Drop into Claude Desktop, Cursor, or any MCP-compatible client. The agent — or the procurement reviewer driving it — gains six tools for inspecting any AI tutor's audience, pedagogy, safety posture, and FERPA / COPPA / GDPR disclosures.
 
@@ -11,15 +11,27 @@ This is the EdTech-flavored sibling of [mcp-aeo-server](https://github.com/mizca
 | Tool | What it does |
 |---|---|
 | `tutor_card_well_known_url` | Compute `/.well-known/tutors/<tutor_id>.json` for a vendor origin |
-| `tutor_card_fetch` | Fetch a published Tutor Card from any URL |
+| `tutor_card_fetch` | Fetch a published Tutor Card from an explicitly allowed canonical HTTPS URL in this standalone source |
 | `tutor_card_validate` | Schema-validate an inline document; also runs the COPPA conditional check |
-| `tutor_card_inspect` | Procurement-grade summary: audience, pedagogy, safety, privacy posture, eval count |
+| `tutor_card_inspect` | Publisher disclosure summary: audience, pedagogy, safety, privacy assertions, eval count |
 | `tutor_card_subject_check` | Given a topic query, classify it as `primary`, `included`, `excluded`, or `unknown` |
-| `tutor_card_coppa_check` | Verify the spec's conditional COPPA rule (age_range_min < 13 ⇒ coppa_compliant) |
+| `tutor_card_coppa_check` | Check the publisher's conditional COPPA declaration (age_range_min < 13 ⇒ coppa_compliant); this is not legal compliance verification |
 
 Six total. Tools that act on a document accept *either* `url` (the server fetches it) *or* `document_json` (an inline JSON string).
 
-## Install
+## Run this standalone source
+
+```bash
+npm ci
+npm run build
+node dist/server.js
+```
+
+Remote fetches require `MCP_AI_TUTOR_ALLOWED_HOSTS` with an explicit comma-separated host list. Inline JSON tools work without network access.
+
+## Unified npm option
+
+The commands below run the unified Suite server and expose additional tools. Review its behavior and network policy before switching an existing client.
 
 ```bash
 npm install -g mcp-kinetic-gain
