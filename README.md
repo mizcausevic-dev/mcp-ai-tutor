@@ -1,6 +1,8 @@
 # mcp-ai-tutor
 
-An **MCP server** that exposes [AI Tutor Card](https://github.com/mizcausevic-dev/ai-tutor-card-spec) declarations as tools. Drop into Claude Desktop, Cursor, or any MCP-compatible client. The agent — or the procurement reviewer driving it — gains six tools for inspecting any AI tutor's audience, pedagogy, safety posture, and FERPA / COPPA / GDPR compliance.
+> **Install path checked 2026-10-30:** The scoped standalone npm package is not published. The public [mcp-kinetic-gain](https://github.com/mizcausevic-dev/mcp-kinetic-gain) package exposes all six `tutor_card_*` tool names from this source repo. Use the unified package below for npm-based MCP clients. This standalone remains a focused source reference while its consumers and archive path are reviewed. Its direct fetch helper has fewer network guards than the unified server, so do not use it with untrusted URLs.
+
+An **MCP server** that exposes [AI Tutor Card](https://github.com/mizcausevic-dev/ai-tutor-card-spec) declarations as tools. Drop into Claude Desktop, Cursor, or any MCP-compatible client. The agent — or the procurement reviewer driving it — gains six tools for inspecting any AI tutor's audience, pedagogy, safety posture, and FERPA / COPPA / GDPR disclosures.
 
 This is the EdTech-flavored sibling of [mcp-aeo-server](https://github.com/mizcausevic-dev/mcp-aeo-server). Same Tool Card discipline, different spec.
 
@@ -20,13 +22,13 @@ Six total. Tools that act on a document accept *either* `url` (the server fetche
 ## Install
 
 ```bash
-npm install -g @mizcausevic-dev/mcp-ai-tutor
+npm install -g mcp-kinetic-gain
 ```
 
 Or run without installing via `npx`:
 
 ```bash
-npx @mizcausevic-dev/mcp-ai-tutor
+npx -y mcp-kinetic-gain
 ```
 
 ## Claude Desktop config
@@ -36,15 +38,15 @@ Add to `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claud
 ```json
 {
   "mcpServers": {
-    "ai-tutor": {
+    "kinetic-gain": {
       "command": "npx",
-      "args": ["-y", "@mizcausevic-dev/mcp-ai-tutor"]
+      "args": ["-y", "mcp-kinetic-gain"]
     }
   }
 }
 ```
 
-Restart Claude. All six `tutor_card_*` tools appear.
+Restart Claude. All six `tutor_card_*` tools appear among the Suite tools.
 
 ## Workflows this unlocks
 
