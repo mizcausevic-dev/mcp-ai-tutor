@@ -1,6 +1,6 @@
 # mcp-ai-tutor
 
-> **Migration review, 2026-10-30:** The scoped standalone npm package is not published. [mcp-kinetic-gain](https://github.com/mizcausevic-dev/mcp-kinetic-gain) exposes the same six `tutor_card_*` tool names and is an npm install option, but v0.10.0 is not a behavior-equivalent replacement. This source defaults remote fetches off, requires an operator host allowlist and canonical card path, caps responses at 256 KiB, and rejects under-13 cards declaring `coppa_compliant=false` during validation. Both implementations have network guards, but the unified server does not yet preserve these exact boundaries or result shapes. Keep this focused source available and do not archive it on tool-name parity alone.
+> **Migration review, 2026-10-31:** The scoped standalone npm package is not published. [mcp-kinetic-gain](https://github.com/mizcausevic-dev/mcp-kinetic-gain) exposes the same six `tutor_card_*` tool names and is an npm install option, but tool-name overlap does not establish behavior parity. At this PR's head, standalone URL fetching has no application host allowlist, canonical card-path restriction, or response-size cap. Schema validation reports the COPPA conditional check separately: it can return `valid: true` with `coppa_check.ok: false`. [Hardening PR #34](https://github.com/mizcausevic-dev/mcp-ai-tutor/pull/34) proposes stricter fetch and validation behavior, but remains unmerged. Keep the focused source available pending consumer and behavior review.
 
 An **MCP server** that exposes [AI Tutor Card](https://github.com/mizcausevic-dev/ai-tutor-card-spec) declarations as tools. Drop into Claude Desktop, Cursor, or any MCP-compatible client. The agent — or the procurement reviewer driving it — gains six tools for inspecting any AI tutor's audience, pedagogy, safety posture, and FERPA / COPPA / GDPR disclosures.
 
@@ -11,8 +11,8 @@ This is the EdTech-flavored sibling of [mcp-aeo-server](https://github.com/mizca
 | Tool | What it does |
 |---|---|
 | `tutor_card_well_known_url` | Compute `/.well-known/tutors/<tutor_id>.json` for a vendor origin |
-| `tutor_card_fetch` | Fetch a published Tutor Card from an explicitly allowed canonical HTTPS URL in this standalone source |
-| `tutor_card_validate` | Schema-validate an inline document; also runs the COPPA conditional check |
+| `tutor_card_fetch` | Fetch a published Tutor Card from a supplied URL; this branch does not enforce a host allowlist |
+| `tutor_card_validate` | Schema-validate an inline document and report the COPPA conditional check separately |
 | `tutor_card_inspect` | Publisher disclosure summary: audience, pedagogy, safety, privacy assertions, eval count |
 | `tutor_card_subject_check` | Given a topic query, classify it as `primary`, `included`, `excluded`, or `unknown` |
 | `tutor_card_coppa_check` | Check the publisher's conditional COPPA declaration (age_range_min < 13 ⇒ coppa_compliant); this is not legal compliance verification |
@@ -27,7 +27,7 @@ npm run build
 node dist/server.js
 ```
 
-Remote fetches require `MCP_AI_TUTOR_ALLOWED_HOSTS` with an explicit comma-separated host list. Inline JSON tools work without network access.
+This branch does not enforce `MCP_AI_TUTOR_ALLOWED_HOSTS`; that control is proposed in [hardening PR #34](https://github.com/mizcausevic-dev/mcp-ai-tutor/pull/34). Use inline JSON for untrusted documents and keep URL fetches limited to trusted operator-controlled input until the fetch boundary is hardened. Inline JSON tools work without network access.
 
 ## Unified npm option
 
